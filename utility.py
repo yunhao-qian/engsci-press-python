@@ -1,37 +1,41 @@
-from entry import Entry
-from trie import Trie
+from shlex import split
 
 
-def default_file_names():
-    path = 'C:/Users/yunha/Desktop/ESC190/engsci-press-python/Dictionary-in-csv'
-    file_names = []
-    for i in range(ord('A'), ord('Z') + 1):
-        file_names.append('{}/{}.csv'.format(path, chr(i)))
-    return tuple(file_names)
+def confirm(message=None, default=True):
+    if message:
+        print(message, end=' ')
+    if default:
+        print('([y]/n)', end=' ')
+    else:
+        print('(y/[n])', end=' ')
+    response = input().strip().lower()
+    if 'yes'.startswith(response):
+        return True
+    if 'no'.startswith(response):
+        return False
+    return default
 
 
-def load_file(dictionary, file_name):
-    try:
-        file = open(file_name)
-    except:
-        print('Failed to open file: {}'.format(file_name))
-        return
-    for line in file:
-        line = line.strip()
-        if len(line) == 0:
-            continue
-        try:
-            dictionary.insert(Entry(line))
-        except:
-            print('Failed to parse the following line in file {}:\n{}'
-                  .format(file_name, line))
-    file.close()
+def missing_argument(expect):
+    print('Missing argument: expect {}'.format(expect))
 
 
-def build_dictionary(file_names=None):
-    if file_names == None:
-        file_names = default_file_names()
-    dictionary = Trie()
-    for file_name in file_names:
-        load_file(dictionary, file_name)
-    return dictionary
+def not_supported(command, mode):
+    print('Does not support command "{}" in {} mode'.format(command, mode))
+
+
+def redundant_arguments(argument):
+    print('Redundant arguments: ignore arguments since "{}"'.format(argument))
+
+
+class InvalidSyntax(Exception):
+
+    def __init__(self, hint, line):
+        Exception.__init__(
+            self, 'Cannot parse the following line: {}\n{}'.format(hint, line))
+
+
+class WordNotFound(Exception):
+
+    def __init__(self, word):
+        Exception.__init__(self, 'Cannot find word: {}'.format(word))
